@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="common/commHeader :: myCommHeader(~{::title})">
+    <title>资源管理</title>
+</head>
+<body>
+<div id="chenjian">
+    <!--<el-button type="success" @click="addResource" icon="el-icon-circle-plus">添加资源</el-button>-->
+    <!---------------------------------资源列表--------------------------------------------->
+    <div>
+        <el-tree v-loading="loading" :data="treeData" :props="defaultProps" node-key="id" :expand-on-click-node="false" @node-click="nodeClick">
+            <span class="custom-tree-node" slot-scope="{ node, data }">
+                <span>{{node.label}}
+                    <i class="el-icon-circle-plus-outline" @click.stop="() => add(data)"></i>
+                    <i class="el-icon-edit-outline" @click.stop="() => edit(data)"></i>
+                    <i class="el-icon-delete" @click.stop="() => remove(node,data)"></i>
+                </span>
+            </span>
+        </el-tree>
+    </div>
+    <!---------------------------------资源添加对话框--------------------------------------------->
+    <el-dialog
+            title="添加资源"
+            :visible.sync="addResourceDialogVisible"
+            width="650px"
+            center
+            >
+        <el-form :inline="true" :model="addForm" :rules="addRules" class="demo-form-inline" size="mini">
+            <el-form-item label="资源名称" prop="name">
+                <el-input v-model="addForm.name" placeholder="资源名称"></el-input>
+            </el-form-item>
+            <el-form-item label="资源类型" prop="resourceType">
+                <el-select v-model="addForm.resourceType" placeholder="资源类型">
+                    <el-option label="菜单" value="0"></el-option>
+                    <el-option label="按钮" value="1"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="资源路径" prop="url">
+                <el-input v-model="addForm.url" placeholder="资源路径"></el-input>
+            </el-form-item>
+            <el-form-item label="资源图标">
+                <el-input v-model="addForm.icon" placeholder="资源图标"></el-input>
+            </el-form-item>
+            <el-form-item label="资源排序">
+                <el-input v-model="addForm.seq" placeholder="排序"></el-input>
+            </el-form-item>
+            <el-form-item label="上级资源">
+                <el-input v-model="addForm.pname" ></el-input>
+            </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="addResourceDialogVisible = false">取 消</el-button>
+            <el-button type="primary" @click="addSubmit">确 定</el-button>
+        </span>
+    </el-dialog>
+            <!---------------------------------资源修改对话框--------------------------------------------->
+            <el-dialog
+                    title="修改用户"
+                    :visible.sync="editcenterDialogVisible"
+                    width="30%"
+                    center
+                    :close-on-click-modal="false">
+                <el-form ref="formb" :model="form" label-width="80px">
+                    <el-form-item label="用户ID">
+                        <el-input v-model="editform.id"></el-input>
+                    </el-form-item>
+                    <el-form-item label="用户名">
+                        <el-input v-model="editform.username"></el-input>
+                    </el-form-item>
+                    <el-form-item label="密码">
+                        <el-input v-model="editform.password"></el-input>
+                    </el-form-item>
+                    <el-form-item label="创建时间">
+                        <el-col>
+                            <el-date-picker
+                                    v-model="editform.createtime"
+                                    type="datetime"
+                                    value-format="yyyy-MM-dd hh:mm:ss"
+                                    placeholder="选择日期时间">
+                            </el-date-picker>
+                        </el-col>
+
+                    </el-form-item>
+                </el-form>
+                <span slot="footer" class="dialog-footer">
+    <el-button @click="editcenterDialogVisible = false">取 消</el-button>
+    <el-button type="primary" @click="editmySubmit">确 定</el-button>
+  </span>
+            </el-dialog>
+</div>
+
+</body>
+<script type="text/javascript">
+    let id = 1000;
+    var vm = new Vue({
+        el: '#chenjian',
+        data: {
+            loading: true,
+            treeData:[],
+            //添加和编辑界面是否显示,默认隐藏
+            addResourceDialogVisible: false,
+            editcenterDialogVisible: false,
+            username: '',
+            addForm: {
+                name: '',
+                resourceType: '',
+                url: '',
+                icon: '',
+                seq: '',
+                pid:'',
+                pname:''
+            },
+            editform: {
+                username: '',
+                password: '',
+                createtime: '',
+                fileLists: [],
+                imageUrls: ''
+            },
+            //编辑用filelist
+            editeFileLists: [],
+            //显示加载中样式
+            loading: false,
+            defaultProps: {
+                children: 'children',
+                label: 'text'
+            },
+            addRules:{
+                name: [
+                    { required: true, message: '请输入资源名称', trigger: 'blur' },
+                    { min: 3, max: 10, message: '长度在 3 到 10 个字符', trigger: 'blur' }
+                ],
+              /*  resourceType: [
+                    { required: true, message: '请选择资源类型', trigger: 'blur' },
+                ],*/
+                url: [
+                    { required: true, message: '请输入资源路径', trigger: 'blur' },
+                ],
+            }
+        },
+        created() {
+            var url = "showAllResourcesTree";
+            var _self=this;
+            axios.post(url).then(function (response) {
+                console.info(response.data);
+                _self.treeData = response.data;
+            });
+        },
+        methods: {
+            //表格重新加载数据
+            loadingData: function () {
+                //定义请求的url
+                var url = "showAllResourcesTree";
+                vm.loading = true;
+                setTimeout(function () {
+                    console.info("加载资源数据成功");
+                    axios.post(url).then(function (response) {
+                        vm.treeData = response.data;
+                    });
+                    vm.loading = false;
+                }, 300);
+            },
+            deleteUser: function (row) {
+                var url = "delUserById?id=" + row.id;
+                axios.get(url).then(function (response) {
+                    vm.loadingData();//重新加载数据
+                    vm.open5(response.data.message);//将后台传入的操作成功失败信息显示在前台
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            //添加资源
+/*            addResource: function () {
+                vm.addResourceDialogVisible = true;
+
+            },*/
+            //表格编辑事件
+            editClick: function (row) {
+                vm.editcenterDialogVisible = true;
+                //vm.editform = row;
+                //Object.assign()接口可以接收多个参数，第一个参数是
+                // 目标对象，后面的都是源对象，assign方法将多个原对象的属性和方法都合并
+                // 到了目标对象上面，如果在这个过程中出现同名的属性（方法），后合并的属性（方法）
+                // 会覆盖之前的同名属性（方法）。
+                vm.editform = Object.assign({}, row);
+                var tempArray = vm.editform.imageUrls.split(',');//将字符串转换成字符串数组
+                vm.editeFileLists = [];
+                for (var i = 0; i < tempArray.length; i++) {
+                    //封装editeFileLists 对象数组
+                    vm.editeFileLists.push({"url": tempArray[i]});
+                }
+            },
+            //添加用户提交
+            mySubmit: function () {
+                var url = "addUser";
+                var urls = [];
+                for (var i = 0; i < vm.form.fileLists.length; i++) {
+                    urls.push(vm.form.fileLists[i].url);
+                }
+                vm.form.imageUrls = urls.join(',');
+                axios.post(url, vm.form).then(function (response) {
+                    //添加成功！
+                    vm.centerDialogVisible = false;
+                    //恢复添加表单的默认值
+                    vm.form = {"username": '', "password": '', "password": '', "createtime": '', "fileLists": []};
+                    vm.loadingData();
+                    vm.open5(response.data.message)
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            //编辑用户提交
+            editmySubmit: function () {
+                var url = "editUser";
+                axios.post(url, vm.editform).then(function (response) {
+                    vm.editcenterDialogVisible = false;
+                    vm.loadingData();//重新加载数据
+                    vm.open5(response.data.message)
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            open5(msg) {
+                this.$notify.info({
+                    title: '消息',
+                    message: msg
+                });
+            },
+            formatterResourceTypeColumn(row){
+                if(row.resourceType==0){
+                    return "菜单"
+                }else{
+                    return "按钮"
+                }
+            },
+            //添加资源
+            add(data) {
+                //data.id为当前节点的id
+               console.info(data.id);
+               vm.addForm.pid=data.id;
+               vm.addForm.pname=data.name;
+               vm.addResourceDialogVisible=true;
+
+            },
+            edit(data) {
+                console.log(data.id);
+            },
+            remove(node, data) {
+                debugger;
+                const parent = node.parent
+                const children = parent.data.children || parent.data;
+                const index = children.findIndex(d => d.id === data.id);
+                children.splice(index, 1);
+                this.$message({
+                    type: 'success',
+                    message: 'delete ok'
+                })
+
+            },
+            nodeClick(data, node, el) {
+                this.$message({
+                    message: '您点击的是:' + data.label,
+                    type: "success"
+                });
+            }
+
+
+
+        }
+
+    });
+</script>
+</body>
+</html>

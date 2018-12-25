@@ -45,7 +45,8 @@ public class ShiroUtil {
 
     public static void main(String[] args) throws Exception {
         int hashIterations = 1000;//加密的次数
-         String salt = UUID.randomUUID().toString();
+        // String salt = UUID.randomUUID().toString();
+         String salt = "test";
         Object credentials = "1234567";//密码
         String hashAlgorithmName = "MD5";//加密方式
         SimpleHash simpleHash = new SimpleHash(hashAlgorithmName, credentials, salt,

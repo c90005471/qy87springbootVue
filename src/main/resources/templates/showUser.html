@@ -29,7 +29,7 @@
         var vm = new Vue({
             el:"#app",
             data:{
-                userList:[]
+                resourceList:[]
             },
             created:function () {
                 //this在then内部失效
@@ -37,7 +37,7 @@
                 //请求后端数据，赋值给userList
                 axios.post('/userinfo/findAllUserJson')
                     .then(function (response) {
-                        temp.userList= response.data;
+                        temp.resourceList= response.data;
                     })
                     .catch(function (error) {
                         console.log(error);

@@ -4,10 +4,7 @@ import com.aaa.entity.Resource;
 import com.aaa.entity.Role;
 import com.aaa.entity.User;
 import com.aaa.service.ILoginService;
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.shiro.authc.AuthenticationInfo;
-import org.apache.shiro.authc.AuthenticationToken;
-import org.apache.shiro.authc.SimpleAuthenticationInfo;
+import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
@@ -39,8 +36,11 @@ public class MyShiroRealm extends AuthorizingRealm {
             //添加角色
             simpleAuthorizationInfo.addRole(role.getName());
             for (Resource resource:role.getResources()) {
-                //添加权限
-                simpleAuthorizationInfo.addStringPermission(resource.getUrl());
+                //添加权限，并排除为空的权限
+                if(resource.getUrl()!=null && resource.getUrl().length()>0){
+                    System.out.println(resource.getUrl());
+                    simpleAuthorizationInfo.addStringPermission(resource.getUrl());
+                }
             }
         }
         return simpleAuthorizationInfo;
@@ -58,9 +58,11 @@ public class MyShiroRealm extends AuthorizingRealm {
         User user = loginService.findByName(name);
         if (user == null) {
             //这里返回后会报出对应异常
-            return null;
+            throw new RuntimeException("账号不存在！");
+            //return null;
         } else {
             //这里验证authenticationToken和simpleAuthenticationInfo的信息
+            //第一个参数是前端传入的用户名
             //第二个参数是数据库中的密文
             //第三个参数是数据库中的盐值
             //返回的是当前会话中保存的名字，前端传入的

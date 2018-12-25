@@ -1,0 +1,122 @@
+package com.aaa.service.impl;
+
+import com.aaa.dao.ResourceMapper;
+import com.aaa.dao.UserMapper;
+import com.aaa.entity.Resource;
+import com.aaa.entity.Role;
+import com.aaa.entity.Tree;
+import com.aaa.entity.User;
+import com.aaa.service.ResourceBiz;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @Author: 陈建
+ * @Date: 2018/12/15 0015 15:46
+ * @Version 1.0
+ */
+@Service
+public class ResourceBizImpl implements ResourceBiz {
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private ResourceMapper resourceMapper;
+    @Override
+    public List<Tree> showAllResources(String username) {
+        List<Tree> trees = new ArrayList<Tree>();
+        //根据名称返回用户对象
+        User user = userMapper.findByName(username);
+        //根据用户id返回所有的角色信息
+        List<Role> roleList = userMapper.findRoleByUserId(user.getId());
+        for (Role role : roleList) {
+            //根据角色id获取所有的权限
+            List<Resource> resourceList = userMapper.findResourceByRoleIds(role.getId());
+            if (resourceList == null) {
+                return trees;
+            }
+            for (Resource resource : resourceList) {
+                if(resource.getResourceType()==0){
+                    Tree tree = new Tree();
+                    tree.setId(resource.getId());
+                    tree.setPid(resource.getPid());
+                    tree.setText(resource.getName());
+                    tree.setIconCls(resource.getIcon());
+                    tree.setAttributes(resource.getUrl());
+                    tree.setOpenMode(resource.getOpenMode());
+                    tree.setState(resource.getOpened()+"");
+                    trees.add(tree);
+                }
+
+            }
+        }
+
+        return trees;
+    }
+
+    /**
+     * 查询所有的资源
+     * @return
+     */
+    @Override
+    public List<Resource> showAllResourcesList() {
+
+        return resourceMapper.findAllResource();
+    }
+
+    /**
+     * 返回资源树
+     * @return
+     */
+    @Override
+    public  List<Tree> showAllResourcesTree(){
+
+        List<Tree> trees = new ArrayList<Tree>();
+        List<Resource> resourceList = resourceMapper.findAllResource();
+        //计算一级菜单
+        for (Resource resource : resourceList) {
+            if(resource.getResourceType()==0&&resource.getPid()==null){
+                Tree tree = new Tree();
+                tree.setId(resource.getId());
+                tree.setPid(resource.getPid());
+                tree.setText(resource.getName());
+                tree.setIconCls(resource.getIcon());
+                tree.setAttributes(resource.getUrl());
+                tree.setOpenMode(resource.getOpenMode());
+                tree.setState(resource.getOpened()+"");
+                tree.setChildren(showAllChildResourcesTree(resource, resourceList));
+                trees.add(tree);
+            }
+
+        }
+
+        return trees;
+    }
+
+    /**
+     * 返回所有的孩子资源
+     * @param  parentResource,resourceList
+     * @return List<Tree>
+     */
+    public  List<Tree> showAllChildResourcesTree(Resource parentResource,List<Resource> resourceList){
+        List<Tree> childList= new ArrayList<Tree>();
+        for (Resource resource : resourceList) {
+            if(resource.getPid()!=null && resource.getPid().equals(parentResource.getId())){
+                Tree tree = new Tree();
+                tree.setId(resource.getId());
+                tree.setPid(resource.getPid());
+                tree.setText(resource.getName());
+                tree.setIconCls(resource.getIcon());
+                tree.setAttributes(resource.getUrl());
+                tree.setOpenMode(resource.getOpenMode());
+                tree.setState(resource.getOpened()+"");
+                tree.setChildren(showAllChildResourcesTree(resource,resourceList));
+                childList.add(tree);
+            }
+
+        }
+        return childList;
+    }
+}

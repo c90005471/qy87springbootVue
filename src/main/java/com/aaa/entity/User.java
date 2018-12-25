@@ -5,31 +5,18 @@ import java.util.List;
 
 public class User {
     private Long id;
-
     private String loginName;
-
     private String name;
-
     private String password;
-
     private String salt;
-
     private Byte sex;
-
     private Byte age;
-
     private String phone;
-
     private Byte userType;
-
     private Byte status;
-
     private Integer organizationId;
-
     private Date createTime;
-
     private String path;
-
     private String email;
     private List<Role> roles;
 

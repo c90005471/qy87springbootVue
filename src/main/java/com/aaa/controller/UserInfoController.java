@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 /**
  * @author TeacherChen
  * @description 用户业务控制器
@@ -59,7 +58,7 @@ public class UserInfoController  extends BaseContrllor{
 	@RequestMapping("/toShowUserEU")
 	public String toShowUserEU(){
 		log.info("toShowUserEU跳转到elementui页面");
-		return "showUserEU";
+		return "admin/showUserEU";
 	}
 
 	@RequestMapping("/findAllUser")
@@ -150,6 +149,9 @@ public class UserInfoController  extends BaseContrllor{
 		return upload(file,filePath);
 	}
 
-
+	@RequestMapping("/tomyChart")
+	public String tomyChart(){
+		return "chart/myChart";
+	}
 
 }

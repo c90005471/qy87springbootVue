@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
+<head th:replace="common/commHeader :: commHeader(~{::title})">
+    <title>资源管理</title>
+    <style rel="stylesheet/css">
+        @keyframes treeTableShow {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        @-webkit-keyframes treeTableShow {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+
+    <style scoped>
+        .ms-tree-space {
+            position: relative;
+            top: 1px;
+            display: inline-block;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 1;
+            width: 18px;
+            height: 14px;
+        }
+        .ms-tree-space::before {
+            content: "";
+        }
+        .processContainer {
+            width: 100%;
+            height: 100%;
+        }
+        table td {
+            line-height: 26px;
+        }
+        .tree-ctrl {
+            position: relative;
+            cursor: pointer;
+            color: #2196f3;
+            margin-left: -18px;
+        }
+    </style>
+</head>
+<body>
+<div id="chenjian">
+    <!---------------------------------资源列表--------------------------------------------->
+    <!--<el-table
+            :data="resourceList"
+            border
+            v-loading.body="loading"
+    >
+        <el-table-column
+                prop="id"
+                label="编号"
+                width="180"
+        >
+        </el-table-column>
+        <el-table-column
+                prop="name"
+                label="资源名称"
+                width="180"
+        >
+        </el-table-column>
+        <el-table-column
+                prop="url"
+                label="资源路径"
+                width="180"
+        >
+        </el-table-column>
+        <el-table-column
+                prop="icon"
+                label="图标"
+                width="180"
+        >
+        </el-table-column>
+        <el-table-column
+                prop="resourceType"
+                label="资源类型"
+                width="180"
+                :formatter="formatterResourceTypeColumn"
+        >
+        </el-table-column>
+
+        <el-table-column
+                prop="createTime"
+                label="创建时间"
+                width="180">
+        </el-table-column>
+        <el-table-column
+                label="操作" width="180">
+            <template slot-scope="scope">
+                <el-button :plain="true" type="success" size="small" icon="edit" @click="editClick(scope.row)">编辑
+                </el-button>
+                <el-button :plain="true" type="danger" size="small" icon="delete" @click="deleteUser(scope.row)">删除
+                </el-button>
+            </template>
+        </el-table-column>
+    </el-table>-->
+    <counter :data="mydata" :columns="columns" border/>
+    <!---------------------------------资源添加对话框--------------------------------------------->
+    <el-dialog
+            title="添加资源"
+            :visible.sync="centerDialogVisible"
+            width="30%"
+            center>
+        <el-form ref="form" :model="form" label-width="80px">
+            <el-form-item label="用户名">
+                <el-input v-model="form.username"></el-input>
+            </el-form-item>
+            <el-form-item label="密码">
+                <el-input v-model="form.password"></el-input>
+            </el-form-item>
+            <el-form-item label="创建时间">
+                <el-col>
+                    <el-date-picker
+                            v-model="form.createtime"
+                            type="datetime"
+                            value-format="yyyy-MM-dd hh:mm:ss"
+                            placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-col>
+
+            </el-form-item>
+        </el-form>
+    </el-dialog>
+    <!---------------------------------资源修改对话框--------------------------------------------->
+    <el-dialog
+            title="修改用户"
+            :visible.sync="editcenterDialogVisible"
+            width="30%"
+            center
+            :close-on-click-modal="false">
+        <el-form ref="formb" :model="form" label-width="80px">
+            <el-form-item label="用户ID">
+                <el-input v-model="editform.id"></el-input>
+            </el-form-item>
+            <el-form-item label="用户名">
+                <el-input v-model="editform.username"></el-input>
+            </el-form-item>
+            <el-form-item label="密码">
+                <el-input v-model="editform.password"></el-input>
+            </el-form-item>
+            <el-form-item label="创建时间">
+                <el-col>
+                    <el-date-picker
+                            v-model="editform.createtime"
+                            type="datetime"
+                            value-format="yyyy-MM-dd hh:mm:ss"
+                            placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-col>
+
+            </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+    <el-button @click="editcenterDialogVisible = false">取 消</el-button>
+    <el-button type="primary" @click="editmySubmit">确 定</el-button>
+  </span>
+    </el-dialog>
+
+</div>
+<template id="mytable">
+    <el-table ref="multipleTable" :data="formatData" :row-style="showRow" v-bind="$attrs">   <!--  @header-click="chooseall" -->
+        <el-table-column :render-header="renderHeader" width="50" align="center">
+            <template slot-scope="scope">
+                <el-checkbox v-model="scope.row.checks" @change="toselect(scope.row)"></el-checkbox>
+            </template>
+        </el-table-column>
+        <el-table-column v-if="columns.length===0" width="150">
+            <template slot-scope="scope">
+                <span v-for="space in scope.row._level" :key="space" class="ms-tree-space"/>
+                <span v-if="iconShow(0,scope.row)" class="tree-ctrl" @click="toggleExpanded(scope.$index)">
+          <i v-if="!scope.row._expanded" class="el-icon-plus"/>
+          <i v-else class="el-icon-minus"/>
+        </span>
+                {{ scope.$index }}
+            </template>
+        </el-table-column>
+        <el-table-column v-for="(column, index) in columns" v-else :key="column.value" :label="column.text" :width="column.width">
+            <template slot-scope="scope">
+                <!-- Todo -->
+                <!-- eslint-disable-next-line vue/no-confusing-v-for-v-if -->
+                <span v-for="space in scope.row._level" v-if="index === 0" :key="space" class="ms-tree-space"/>
+                <span v-if="iconShow(index,scope.row)" class="tree-ctrl" @click="toggleExpanded(scope.$index)">
+          <i v-if="!scope.row._expanded" class="el-icon-plus"/>
+          <i v-else class="el-icon-minus"/>
+        </span>
+                {{ scope.row[column.value] }}
+            </template>
+        </el-table-column>
+        <slot/>
+    </el-table>
+</template>
+</body>
+<script type="text/javascript">
+    function treeToArray(data,
+        expandAll,
+        parent = null,
+        level = null) {
+        let tmp = [];
+        Array.from(data).forEach(function (record) {
+            if (record._expanded === undefined) {
+                Vue.set(record, "_expanded", expandAll);
+            }
+            let _level = 1;
+            if (level !== undefined && level !== null) {
+                _level = level + 1;
+            }
+            Vue.set(record, "_level", _level);
+            // 如果有父元素
+            if (parent) {
+                Vue.set(record, "parent", parent);
+            }
+            tmp.push(record);
+            if (record.child && record.child.length > 0) {
+                const child = vm.treeToArray(record.child, expandAll, record, _level);
+                tmp = tmp.concat(child);
+            }
+        });
+        return tmp;
+    }
+    var counter={
+        template:"#mytable",
+        data() {
+            return {
+                chooseson: true, //全选
+                key: true //单个点击直到全部选中
+            };
+        },
+        props: {
+            /* eslint-disable */
+            data: {
+                type: [Array, Object],
+                required: true
+            },
+            columns: {
+                type: Array,
+                default: () => []
+            },
+            evalFunc: Function,
+            evalArgs: Array,
+            expandAll: {
+                type: Boolean,
+                default: false
+            }
+        },
+        computed: {
+            // 格式化数据源
+            formatData: function() {
+                let tmp;
+                if (!Array.isArray(this.data)) {
+                    tmp = [this.data];
+                } else {
+                    tmp = this.data;
+                }
+                const func = this.evalFunc || treeToArray;
+                const args = this.evalArgs
+                    ? [tmp, this.expandAll].concat(this.evalArgs)
+                    : [tmp, this.expandAll];
+                return func.apply(null, args);
+            }
+        },
+        methods: {
+            showRow: function(row) {
+                const show = row.row.parent
+                    ? row.row.parent._expanded && row.row.parent._show
+                    : true;
+                row.row._show = show;
+                return show
+                    ? "animation:treeTableShow 1s;-webkit-animation:treeTableShow 1s;"
+                    : "display:none;";
+            },
+            // 切换下级是否展开
+            toggleExpanded: function(trIndex) {
+                const record = this.formatData[trIndex];
+                record._expanded = !record._expanded;
+            },
+            // 图标显示
+            iconShow(index, record) {
+                return index === 0 && record.child && record.child.length > 0;
+            },
+
+            //设置表头全选
+            renderHeader(h, data) {
+                return h("span", [
+                    h("input", {
+                        attrs: {
+                            id: "chooseall",
+                            type: "checkbox",
+                            style:
+                                "border: 1px solid #dcdfe6;border-radius: 2px;box-sizing: border-box;width: 14px;height: 14px;background-color: #fff;"
+                        }
+                    })
+                ]);
+            },
+            //功能函数:选中部分子集
+            setchildtobeselect(arr, key) {
+                arr.forEach((v, i) => {
+                    v.checks = key;
+                    // v._expanded = key;//选中后展开子项
+                    if (v.child) {
+                        this.setchildtobeselect(v.child, v.checks);
+                    }
+                });
+            },
+            //是否所有的都被选中
+            isallchecked(arr) {
+                arr.forEach((v, i) => {
+                    if (!v.checks) {
+                        this.key = false;
+                    }
+                    if (v.child) {
+                        this.isallchecked(v.child);
+                    }
+                });
+            },
+            //设置父级为 未选中状态（父级的父级没改变-有bug）
+            setparentfalse(arr, id, level) {
+                arr.forEach((v, i) => {
+                    if (v._level == level - 1 && v.child) {
+                        v.child.forEach((val, ind) => {
+                            if (val.id == id) {
+                                v.checks = false;
+                                return false; //终止此次循环，减少循环次数
+                            }
+                        });
+                    }
+                    if (v.child) {
+                        this.setparentfalse(v.child, id, level);
+                    }
+                });
+            },
+            //设置父级为 选中状态
+            setparenttrue(arr, id, level) {
+                arr.forEach((v, i) => {
+                    if (v._level == level - 1 && v.child) {
+                        let key = true;
+                        let sameidkey = false;
+                        v.child.forEach((val, ind) => {
+                            if (val.id == id) {
+                                //确保当前点击的在该父级内
+                                sameidkey = true;
+                            }
+                            if (!val.checks) {
+                                key = false;
+                            }
+                        });
+                        if (key && sameidkey) {
+                            v.checks = true;
+                        }
+                    }
+                    if (v.child) {
+                        this.setparentfalse(v.child, id, level);
+                    }
+                });
+            },
+            //某个复选框被点击时
+            toselect(row) {
+                console.log(row);
+                // row._expanded = row.checks;//选中后是否展开
+                //1、若有子集先让子选中
+                if (row.child) {
+                    this.setchildtobeselect(row.child, row.checks);
+                }
+                //2、然后判断是否全选中
+                this.key = true; //重置为true，防止上次已经是false的状态
+                this.isallchecked(this.formatData);
+                //3、设置多选框的状态
+                if (!row.checks) {
+                    this.setparentfalse(this.formatData, row.id, row._level); //设置父级选中的状态为false
+                    document.getElementById("chooseall").checked = false; //设置全选框的状态
+                } else {
+                    this.setparenttrue(this.formatData, row.id, row._level); //设置父级选中的状态为true
+                }
+                if (this.key) {
+                    document.getElementById("chooseall").checked = true; //设置全选框的状态
+                }
+            }
+        },
+        mounted() {
+            this.$nextTick(() => {
+                var that = this;
+                const all = document.getElementById("chooseall");
+                all.onchange = function(e) {
+                    console.log(all.checked);
+                    if (all.checked == true) {
+                        that.setchildtobeselect(that.formatData, true);
+                    } else {
+                        that.setchildtobeselect(that.formatData, false);
+                    }
+                };
+            });
+        }
+    }
+    var vm = new Vue({
+        el: '#chenjian',
+        components:{
+            counter:counter // 将定义的对象注册为组件
+        },
+        data: {
+            loading: true,
+            resourceList: [],
+            //添加和编辑界面是否显示
+            centerDialogVisible: false,
+            editcenterDialogVisible: false,
+            username: '',
+            form: {
+                username: '',
+                password: '',
+                createtime: '',
+                fileLists: [],
+                imageUrls: ''
+            },
+            editform: {
+                username: '',
+                password: '',
+                createtime: '',
+                fileLists: [],
+                imageUrls: ''
+            },
+            //编辑用filelist
+            editeFileLists: [],
+            //显示加载中样式
+            loading: false,
+            columns: [
+                {
+                    text: "事件",
+                    value: "event",
+                    width: 200
+                },
+                {
+                    text: "ID",
+                    value: "id"
+                }
+            ],
+            mydata: [
+                {
+                    id: 0,
+                    event: "事件1",
+                    timeLine: 50,
+                    comment: "无"
+                },
+                {
+                    id: 1,
+                    event: "事件1",
+                    timeLine: 100,
+                    comment: "无",
+                    children: [
+                        {
+                            id: 2,
+                            event: "事件2",
+                            timeLine: 10,
+                            comment: "无"
+                        },
+                        {
+                            id: 3,
+                            event: "事件3",
+                            timeLine: 90,
+                            comment: "无",
+                            children: [
+                                {
+                                    id: 4,
+                                    event: "事件4",
+                                    timeLine: 5,
+                                    comment: "无"
+                                },
+                                {
+                                    id: 5,
+                                    event: "事件5",
+                                    timeLine: 10,
+                                    comment: "无"
+                                },
+                                {
+                                    id: 6,
+                                    event: "事件6",
+                                    timeLine: 75,
+                                    comment: "无",
+                                    children: [
+                                        {
+                                            id: 7,
+                                            event: "事件7",
+                                            timeLine: 50,
+                                            comment: "无",
+                                            children: [
+                                                {
+                                                    id: 71,
+                                                    event: "事件71",
+                                                    timeLine: 25,
+                                                    comment: "xx"
+                                                },
+                                                {
+                                                    id: 72,
+                                                    event: "事件72",
+                                                    timeLine: 5,
+                                                    comment: "xx"
+                                                },
+                                                {
+                                                    id: 73,
+                                                    event: "事件73",
+                                                    timeLine: 20,
+                                                    comment: "xx"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            id: 8,
+                                            event: "事件8",
+                                            timeLine: 25,
+                                            comment: "无"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        created() {
+            var url = "showAllResourcesList";
+            var _self = this;
+            axios.post(url).then(function (response) {
+                console.info(response.data);
+                _self.resourceList = response.data;
+            });
+        },
+        methods: {
+            //表格重新加载数据
+            loadingData: function () {
+                //定义请求的url
+                var url = "showAllResourcesList";
+                vm.loading = true;
+                setTimeout(function () {
+                    alert(111111111);
+                    console.info("加载资源数据成功");
+                    axios.post(url).then(function (response) {
+                        vm.resourceList = response.data;
+                    });
+                    vm.loading = false;
+                }, 300);
+            },
+            deleteUser: function (row) {
+                var url = "delUserById?id=" + row.id;
+                axios.get(url).then(function (response) {
+                    vm.loadingData();//重新加载数据
+                    vm.open5(response.data.message);//将后台传入的操作成功失败信息显示在前台
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            //添加用户
+            addClick: function () {
+                vm.centerDialogVisible = true;
+
+            },
+            //表格编辑事件
+            editClick: function (row) {
+                vm.editcenterDialogVisible = true;
+                //vm.editform = row;
+                //Object.assign()接口可以接收多个参数，第一个参数是
+                // 目标对象，后面的都是源对象，assign方法将多个原对象的属性和方法都合并
+                // 到了目标对象上面，如果在这个过程中出现同名的属性（方法），后合并的属性（方法）
+                // 会覆盖之前的同名属性（方法）。
+                vm.editform = Object.assign({}, row);
+                var tempArray = vm.editform.imageUrls.split(',');//将字符串转换成字符串数组
+                vm.editeFileLists = [];
+                for (var i = 0; i < tempArray.length; i++) {
+                    //封装editeFileLists 对象数组
+                    vm.editeFileLists.push({"url": tempArray[i]});
+                }
+            },
+            //添加用户提交
+            mySubmit: function () {
+                var url = "addUser";
+                var urls = [];
+                for (var i = 0; i < vm.form.fileLists.length; i++) {
+                    urls.push(vm.form.fileLists[i].url);
+                }
+                vm.form.imageUrls = urls.join(',');
+                axios.post(url, vm.form).then(function (response) {
+                    //添加成功！
+                    vm.centerDialogVisible = false;
+                    //恢复添加表单的默认值
+                    vm.form = {"username": '', "password": '', "password": '', "createtime": '', "fileLists": []};
+                    vm.loadingData();
+                    vm.open5(response.data.message)
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            //编辑用户提交
+            editmySubmit: function () {
+                var url = "editUser";
+                axios.post(url, vm.editform).then(function (response) {
+                    vm.editcenterDialogVisible = false;
+                    vm.loadingData();//重新加载数据
+                    vm.open5(response.data.message)
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            open5(msg) {
+                this.$notify.info({
+                    title: '消息',
+                    message: msg
+                });
+            },
+            formatterResourceTypeColumn(row) {
+                if (row.resourceType == 0) {
+                    return "菜单"
+                } else {
+                    return "按钮"
+                }
+
+            },
+
+
+
+        }
+
+    });
+</script>
+</body>
+</html>

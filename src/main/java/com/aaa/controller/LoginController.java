@@ -1,6 +1,6 @@
 package com.aaa.controller;
 
-import com.aaa.entity.Role;
+import com.aaa.entity.ResultModel;
 import com.aaa.entity.User;
 import com.aaa.service.ILoginService;
 import org.apache.shiro.SecurityUtils;
@@ -16,8 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-
-import java.util.Map;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @Author: 陈建
@@ -32,14 +31,13 @@ public class LoginController extends  BaseContrllor {
     //退出的时候是get请求，主要是用于退出
     @RequestMapping(value = "/login",method = RequestMethod.GET)
     public String login(){
-        System.out.println("tologin");
-
         return "login";
     }
-
     //post登录
     @RequestMapping(value = "/login",method = RequestMethod.POST)
-    public String login( User user){
+    @ResponseBody
+    public ResultModel login(@RequestBody User user){
+        System.out.println(user.getLoginName());
         System.out.println("login");
         //添加用户认证信息
         Subject subject = SecurityUtils.getSubject();
@@ -49,21 +47,25 @@ public class LoginController extends  BaseContrllor {
         try {
             subject.login(usernamePasswordToken);
             System.out.println("aaaaaaaaaaaaaaaaa");
-            return "index";
+            //return "index";
+            return returnSuccessInfo("登录成功！");
         } catch (UnknownAccountException e) {
-            throw new RuntimeException("账号不存在！", e);
+           // throw new RuntimeException("账号不存在！", e);
+            return returnErrorInfo("账号不存在！");
         } catch (DisabledAccountException e) {
-            throw new RuntimeException("账号未启用！", e);
+            //throw new RuntimeException("账号未启用！", e);
+            return returnErrorInfo("账号未启用！");
         } catch (IncorrectCredentialsException e) {
-            throw new RuntimeException("密码错误！", e);
+            //throw new RuntimeException("密码错误！", e);
+            return returnErrorInfo("密码错误！");
         } catch (Throwable e) {
-            throw new RuntimeException(e.getMessage(), e);
+            //throw new RuntimeException(e.getMessage(), e);
+            return  returnErrorInfo(e.getMessage());
         }
 
     }
-
-    @RequestMapping(value = "/index")
-    public String index(){
+    @RequestMapping(value = "/toindex")
+    public String toindex(){
         return "index";
     }
 
@@ -95,11 +97,19 @@ public class LoginController extends  BaseContrllor {
 
     //注解的使用
     @RequiresRoles("admin")
-    @RequiresPermissions("create")
+    //@RequiresPermissions("create")
     @RequestMapping(value = "/create")
     public String create(){
         System.out.println("create");
         return "Create success!";
+    }
+    @RequestMapping("/tojuese")
+    public String tojuese(){
+        return "bumen";
+    }
+    @RequestMapping("/toziyuan")
+    public String toziyuan(){
+        return "ziyuan";
     }
 
 }

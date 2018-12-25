@@ -9,6 +9,8 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 
 import com.aaa.entity.ResultModel;
+import com.aaa.shiro.ShiroUser;
+import org.apache.shiro.SecurityUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -89,5 +91,14 @@ public class BaseContrllor {
 		}
 		return map;
 	}
+
+	/**
+	 * 获取当前登录用户名
+	 * @return {ShiroUser}
+	 */
+	public String getShiroUserName() {
+		return  SecurityUtils.getSubject().getPrincipal().toString();
+	}
+
 
 }

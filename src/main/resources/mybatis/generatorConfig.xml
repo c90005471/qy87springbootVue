@@ -40,18 +40,11 @@
             <property name="enableSubPackages" value="false" />
         </javaClientGenerator>
         <!-- tableName:用于自动生成代码的数据库表；domainObjectName:对应于数据库表的javaBean类名 -->
-  <!--      <table schema="aaa" tableName="user" domainObjectName="User"
-               enableCountByExample="false" enableUpdateByExample="false"
-               enableDeleteByExample="false" enableSelectByExample="false"
-               selectByExampleQueryId="false"></table>-->
-        <table schema="aaa" tableName="role" domainObjectName="Role"
+    <table schema="aaa" tableName="user" domainObjectName="UserNew"
                enableCountByExample="false" enableUpdateByExample="false"
                enableDeleteByExample="false" enableSelectByExample="false"
                selectByExampleQueryId="false"></table>
-        <!--<table schema="aaa" tableName="resource" domainObjectName="Resource"
-               enableCountByExample="false" enableUpdateByExample="false"
-               enableDeleteByExample="false" enableSelectByExample="false"
-               selectByExampleQueryId="false"></table>-->
+
     </context>
 
 </generatorConfiguration>

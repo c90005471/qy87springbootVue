@@ -104,4 +104,7 @@
       </if>
     </trim>
   </insert>
+  <select id="findAllResource"  resultMap="BaseResultMap">
+        select * from resource
+  </select>
 </mapper>
