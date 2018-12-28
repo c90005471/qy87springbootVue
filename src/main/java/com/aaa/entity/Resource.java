@@ -19,13 +19,13 @@ public class Resource {
 
     private Byte seq;
 
-    private Byte status;
+    private Byte status=0;
 
-    private Byte opened;
+    private Byte opened=0;
 
     private Byte resourceType;
 
-    private Date createTime;
+    private Date createTime=new Date();
 
     public Long getId() {
         return id;

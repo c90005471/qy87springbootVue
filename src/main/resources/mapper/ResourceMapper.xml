@@ -16,11 +16,11 @@
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
   </resultMap>
   <insert id="insert" parameterType="com.aaa.entity.Resource">
-    insert into resource (id, name, url, 
+    insert into resource (name, url,
       open_mode, description, icon, 
       pid, seq, status, opened, 
       resource_type, create_time)
-    values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR}, 
+    values (#{name,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR},
       #{openMode,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, #{icon,jdbcType=VARCHAR}, 
       #{pid,jdbcType=BIGINT}, #{seq,jdbcType=TINYINT}, #{status,jdbcType=TINYINT}, #{opened,jdbcType=TINYINT}, 
       #{resourceType,jdbcType=TINYINT}, #{createTime,jdbcType=TIMESTAMP})
@@ -107,4 +107,24 @@
   <select id="findAllResource"  resultMap="BaseResultMap">
         select * from resource
   </select>
+  <select id="findAllMenuResource"  resultMap="BaseResultMap">
+        select * from resource where resource_type=0
+  </select>
+  <select id="findChildResourceById" parameterType="long" resultType="java.lang.Long">
+    select id from resource r where r.id=#{id} UNION
+select id from resource r where r.pid in (select r.id from resource r where r.id=#{id} ) UNION
+select id from resource r where r.pid in (select r.id from resource r where r.pid in (select r.id from resource r where r.id=#{id} ))
+  </select>
+  <delete id="deleteResourceByIds" parameterType="java.util.List">
+        delete  from resource where id in
+    <foreach collection="list" item="it" index="index" open="(" close=")" separator=",">
+        #{it}
+    </foreach>
+  </delete>
+  <select id="findResourceById" parameterType="Long" resultType="java.util.Map">
+    select r.id, r.name ,r.url,r.icon,r.seq,r.pid,r.resource_type as resourceType ,rr.name as pname from resource r LEFT JOIN resource rr on r.pid=rr.id  where  r.id=#{id}
+  </select>
+  <update id="editResource" parameterType="com.aaa.entity.Resource">
+      update resource set name=#{name},resource_type=#{resourceType},url=#{url},icon=#{icon},seq=#{seq},pid=#{pid} where id=#{id}
+  </update>
 </mapper>

@@ -23,9 +23,9 @@
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
   </resultMap>
   <insert id="insert" parameterType="com.aaa.entity.Role">
-    insert into role (id, name, seq, 
+    insert into role ( name, seq,
       description, status)
-    values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{seq,jdbcType=TINYINT}, 
+    values ( #{name,jdbcType=VARCHAR}, #{seq,jdbcType=TINYINT},
       #{description,jdbcType=VARCHAR}, #{status,jdbcType=TINYINT})
   </insert>
   <insert id="insertSelective" parameterType="com.aaa.entity.Role">
@@ -65,4 +65,24 @@
       </if>
     </trim>
   </insert>
+  <insert id="addGrandResource" parameterType="java.util.Map">
+    INSERT INTO role_resource (role_id, resource_id) VALUES (#{roleId},#{resourceId})
+
+  </insert>
+  <delete id="delRoleById" parameterType="java.lang.Long">
+      delete  from role where id=#{id}
+  </delete>
+  <delete id="delRoleUser" parameterType="long">
+      delete from user_role where role_id=#{id}
+  </delete>
+  <delete id="delRoleResource" parameterType="java.lang.Long">
+      delete from role_resource where role_id=#{id}
+  </delete>
+  <select id="findAllRole" resultMap="BaseResultMap">
+      select * from role order by seq asc
+  </select>
+  <!--根据roleid查询对应的所有resource的id-->
+  <select id="findResourceByRoleId" parameterType="java.lang.Long" resultType="java.lang.Long">
+      select resource_id as id from role_resource where role_id=#{id}
+  </select>
 </mapper>

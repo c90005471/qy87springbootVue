@@ -143,7 +143,7 @@
         },
         methods: {
             loadingData: function () {
-                var url = "/showAllResources";
+                var url = "/resource/showAllResources";
                 axios.post(url).then(function (response) {
                     console.info(response.data);
                     vm.menuTree = response.data;
@@ -161,7 +161,7 @@
             },
             logout() {
                 this.$store.dispatch('LogOut').then(() => {
-                    location.reload() // 为了重新实例化vue-router对象 避免bug
+                    location.reload()
                 })
             },
             changeMain: function (url) {

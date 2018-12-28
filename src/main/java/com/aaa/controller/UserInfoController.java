@@ -42,7 +42,6 @@ public class UserInfoController  extends BaseContrllor{
 
 	@RequestMapping("/toShowUser")
 	public String toShowUser(){
-
 		return "showUser";
 	}
 
@@ -149,9 +148,5 @@ public class UserInfoController  extends BaseContrllor{
 		return upload(file,filePath);
 	}
 
-	@RequestMapping("/tomyChart")
-	public String tomyChart(){
-		return "chart/myChart";
-	}
 
 }
