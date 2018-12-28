@@ -104,7 +104,7 @@
     </el-dialog >
     <!--显示父级资源树-->
     <el-dialog :visible.sync="parentTreeDialogVisible">
-        <el-tree :data="parentTreeData" :props="defaultProps" node-key="id" :expand-on-click-node="false" @node-click="parentEditNodeClick">
+        <el-tree :data="parentTreeData" :props="defaultProps" node-key="id" :expand-on-click-node="false" @node-click="parentNodeClick">
             <span class="custom-tree-node" slot-scope="{ node, data }">
                 <span>{{node.label}}
                 </span>
@@ -287,18 +287,14 @@
             },
             //将选中的菜单显示到添加对话框的上级资源中
             parentNodeClick(data, node, el) {
+               alert(111)
                console.info(data)
                vm.addForm.pname=data.text;
                vm.addForm.pid=data.id;
                vm.parentTreeDialogVisible=false;
-
-            },
-            //将选中的菜单显示到编辑对话框的上级资源中
-            parentEditNodeClick(data, node, el) {
-               console.info(data)
-               vm.editform.pname=data.text;
-               vm.editform.pid=data.id;
-               vm.parentTreeDialogVisible=false;
+                vm.editform.pname=data.text;
+                vm.editform.pid=data.id;
+                vm.parentTreeDialogVisible=false;
 
             },
         }
