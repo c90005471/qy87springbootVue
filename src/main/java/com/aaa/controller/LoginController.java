@@ -1,14 +1,13 @@
 package com.aaa.controller;
 
 import com.aaa.entity.ResultModel;
-import com.aaa.entity.User;
+import com.aaa.entity.UserInfo;
 import com.aaa.service.ILoginService;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.DisabledAccountException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,12 +35,12 @@ public class LoginController extends  BaseContrllor {
     //post登录
     @RequestMapping(value = "/login",method = RequestMethod.POST)
     @ResponseBody
-    public ResultModel login(@RequestBody User user){
-        System.out.println(user.getLoginName());
+    public ResultModel login(@RequestBody UserInfo user){
+        System.out.println(user.getUsername());
         System.out.println("login");
         //添加用户认证信息
         Subject subject = SecurityUtils.getSubject();
-        UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(user.getLoginName(),user.getPassword());
+        UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(user.getUsername(),user.getPassword());
         //进行验证，这里可以捕获异常，然后返回对应信息
 
         try {
@@ -81,19 +80,6 @@ public class LoginController extends  BaseContrllor {
         return "error ok!";
     }
 
-    //数据初始化
-    @RequestMapping(value = "/addUser")
-    public String addUser(@RequestBody User map){
-        User user = loginService.addUser(map);
-        return "addUser is ok! \n" + user;
-    }
-
-    //角色初始化
-    /*@RequestMapping(value = "/addRole")
-    public String addRole(@RequestBody Map<String,Object> map){
-        Role role = loginService.addRole(map);
-        return "addRole is ok! \n" + role;
-    }*/
 
     //注解的使用
     @RequiresRoles("admin")

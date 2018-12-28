@@ -11,6 +11,9 @@ import javax.servlet.http.HttpServletResponse;
 import com.aaa.entity.ResultModel;
 import com.aaa.shiro.ShiroUser;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
+import org.apache.shiro.crypto.hash.SimpleHash;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +25,8 @@ import org.springframework.web.multipart.MultipartFile;
  * 2018-6-13上午9:57:20
  */
 public class BaseContrllor {
+	@Autowired
+	private HashedCredentialsMatcher hashedCredentialsMatcher;
 	public ResultModel returnSuccessInfo(String meassage) {
 		ResultModel rm= new ResultModel();
 		rm.setRetStatus(0);
@@ -100,5 +105,20 @@ public class BaseContrllor {
 		return  SecurityUtils.getSubject().getPrincipal().toString();
 	}
 
+
+	/**
+	 * 加盐加密
+	 * @param password
+	 * @return
+	 */
+	public String shiroPasswordUtil(String salt,String password ){
+
+		String hashAlgorithmName = hashedCredentialsMatcher.getHashAlgorithmName();
+		int hashIterations = hashedCredentialsMatcher.getHashIterations();
+		//密码加密加盐保存
+		SimpleHash passwordHash = new SimpleHash(hashAlgorithmName, password, salt,
+				hashIterations);
+		return passwordHash.toString();
+	}
 
 }

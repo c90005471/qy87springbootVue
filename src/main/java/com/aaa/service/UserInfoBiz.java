@@ -6,7 +6,6 @@ import java.util.Map;
 import com.aaa.entity.MyCondition;
 import com.aaa.entity.PageBean;
 import com.aaa.entity.UserInfo;
-import com.aaa.entity.UserInfoVo;
 
 public interface UserInfoBiz {
 	List<UserInfo>findAllUser();

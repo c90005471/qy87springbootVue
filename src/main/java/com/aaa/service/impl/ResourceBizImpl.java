@@ -1,11 +1,11 @@
 package com.aaa.service.impl;
 
 import com.aaa.dao.ResourceMapper;
-import com.aaa.dao.UserMapper;
+import com.aaa.dao.UserInfoDao;
 import com.aaa.entity.Resource;
 import com.aaa.entity.Role;
 import com.aaa.entity.Tree;
-import com.aaa.entity.User;
+import com.aaa.entity.UserInfo;
 import com.aaa.service.ResourceBiz;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,14 +22,17 @@ import java.util.Map;
 @Service
 public class ResourceBizImpl implements ResourceBiz {
     @Autowired
-    private UserMapper userMapper;
+    private UserInfoDao userMapper;
     @Autowired
     private ResourceMapper resourceMapper;
     @Override
     public List<Tree> showAllResources(String username) {
         List<Tree> trees = new ArrayList<Tree>();
         //根据名称返回用户对象
-        User user = userMapper.findByName(username);
+        UserInfo user = userMapper.findByName(username);
+        if(user==null){
+            return null;
+        }
         //根据用户id返回所有的角色信息
         List<Role> roleList = userMapper.findRoleByUserId(user.getId());
         for (Role role : roleList) {

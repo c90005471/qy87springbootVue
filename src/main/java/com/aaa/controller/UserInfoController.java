@@ -7,6 +7,8 @@ import com.aaa.entity.UserInfo;
 import com.aaa.service.UserInfoBiz;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
+import org.apache.shiro.crypto.hash.SimpleHash;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -20,10 +22,9 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.sql.Timestamp;
+import java.util.*;
+
 /**
  * @author TeacherChen
  * @description 用户业务控制器
@@ -39,6 +40,8 @@ public class UserInfoController  extends BaseContrllor{
 	private UserInfoBiz userInfoImpl;
 	@Value("${fileupload.path}")
 	private String filePath;
+
+
 
 	@RequestMapping("/toShowUser")
 	public String toShowUser(){
@@ -99,7 +102,6 @@ public class UserInfoController  extends BaseContrllor{
 		List<UserInfo> userList = userInfoImpl.findAllUserCondition(condition);
 		session.setAttribute("userList", userList);
 		return "showUser";
-		
 	}
 	@RequestMapping("/toAddUserPage")
 	public  String  toAddUserPage() {
@@ -109,10 +111,10 @@ public class UserInfoController  extends BaseContrllor{
 	@RequestMapping("/addUser")
 	@ResponseBody
 	public ResultModel addUser(@RequestBody UserInfo user) {
-/*		String salt = StringUtils.getUUId();
-		String pwd = passwordHash.toHex(userVo.getPassword(), salt);
-		userVo.setSalt(salt);
-		userVo.setPassword(pwd);*/
+		String salt = UUID.randomUUID()+"";
+		user.setPassword(shiroPasswordUtil(salt,user.getPassword()));
+		user.setSalt(salt);
+		user.setCreatetime(new Timestamp(System.currentTimeMillis()));
 		int ret=userInfoImpl.addUser(user);
 		if (ret>0){
 			return returnSuccessInfo("添加成功");
@@ -148,5 +150,8 @@ public class UserInfoController  extends BaseContrllor{
 		return upload(file,filePath);
 	}
 
-
+	@RequestMapping("/welcome")
+	public String welcome(){
+		return "welcome";
+	}
 }

@@ -2,9 +2,12 @@ package com.aaa.shiro;
 
 import com.aaa.entity.Resource;
 import com.aaa.entity.Role;
-import com.aaa.entity.User;
+import com.aaa.entity.UserInfo;
 import com.aaa.service.ILoginService;
-import org.apache.shiro.authc.*;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.AuthenticationInfo;
+import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.authc.SimpleAuthenticationInfo;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
@@ -29,7 +32,7 @@ public class MyShiroRealm extends AuthorizingRealm {
         //获取登录用户名
         String name= (String) principalCollection.getPrimaryPrincipal();
         //查询用户名称
-        User user = loginService.findByName(name);
+        UserInfo user = loginService.findByName(name);
         //添加角色和权限
         SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
         for (Role role:user.getRoles()) {
@@ -37,7 +40,7 @@ public class MyShiroRealm extends AuthorizingRealm {
             simpleAuthorizationInfo.addRole(role.getName());
             for (Resource resource:role.getResources()) {
                 //添加权限，并排除为空的权限
-                if(resource.getUrl()!=null && resource.getUrl().length()>0){
+                if(resource!=null&&resource.getUrl()!=null && resource.getUrl().length()>0){
                     System.out.println(resource.getUrl());
                     simpleAuthorizationInfo.addStringPermission(resource.getUrl());
                 }
@@ -55,7 +58,7 @@ public class MyShiroRealm extends AuthorizingRealm {
         }
         //获取用户信息
         String name = authenticationToken.getPrincipal().toString();
-        User user = loginService.findByName(name);
+        UserInfo user = loginService.findByName(name);
         if (user == null) {
             //这里返回后会报出对应异常
             throw new RuntimeException("账号不存在！");

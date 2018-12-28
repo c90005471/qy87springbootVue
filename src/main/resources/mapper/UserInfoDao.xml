@@ -7,12 +7,8 @@
 	<sql id="mySqlStatment">
     	id,username,password,createtime,imageurls
     </sql>
-	<!-- <insert id="addUser" parameterType="userinfo">
-		insert into tbl_userinfo values (seq_userinfo.nextval,#{username},#{password},#{createtime})
-	</insert> -->
-	 <insert id="addUser" parameterType="userinfo">
-		insert into tbl_userinfo (username,password,createtime,imageurls) values (#{username},#{password},#{createtime},#{imageUrls})
-
+	 <insert id="addUser" useGeneratedKeys="true" keyProperty="id" parameterType="userinfo">
+		insert into tbl_userinfo (username,password,salt,createtime,imageurls) values (#{username},#{password},#{salt},#{createtime},#{imageUrls})
 	</insert>
 	<insert id="addUserRetInt" parameterType="userinfo">
 		insert into tbl_userinfo values (seq_userinfo.nextval,#{username},#{password},#{createtime})
@@ -24,6 +20,9 @@
 		</selectKey>
 		insert into tbl_userinfo values (#{id},#{username},#{password},#{createtime})
 	</insert>
+	<insert id="addUserRole" parameterType="java.util.Map">
+		insert into user_role(user_id ,role_id) values (#{userId},#{roleId})
+	</insert>
 	<!-- mysql或者sqlserver返回主键 -->
 	<!--<insert id="addUser" useGeneratedKeys="true" keyProperty="id" parameterType="userinfo">
 		insert into tbl_userinfo values (#{id},#{username},#{password},#{createtime})
@@ -32,7 +31,7 @@
 		select <include refid="mySqlStatment"></include> from tbl_userinfo where id=#{fdsaf}
 	</select>
 	<!-- 使用resultType的时候，要求返回值的列名必须跟实体类中的属性名保持一致 -->
-	<select id="findAllUser"  resultType="userinfo">
+	<select id="findAllUser"  resultType="com.aaa.entity.UserInfo">
 		select <include refid="mySqlStatment"></include> from tbl_userinfo
 	</select>
 	<!-- 	<select id="findAllUser"  resultMap="myresultMap">
@@ -51,17 +50,20 @@
 		<result property="password" column="password"/>
 		<result property="createtime" column="createtime"/>
 	</resultMap>
-	<select id="findAllUserCondition" parameterType="com.aaa.entity.MyCondition" resultType="userinfo" >
+	<select id="findAllUserCondition" parameterType="com.aaa.entity.MyCondition" resultType="com.aaa.entity.UserInfo" >
 		select <include refid="mySqlStatment"></include> from tbl_userinfo where createtime between #{startTime} and #{endTime}
 	</select>
 	<delete id="delUserById" parameterType="int">
 		  delete  from tbl_userinfo where id=#{fdsa}
 	</delete>
+	<delete id="delUserRoleById" parameterType="integer">
+		delete from user_role where user_id=#{id}
+	</delete>
 	<update id="editUser" parameterType="userinfo">
 			update tbl_userinfo set username=#{username},password=#{password},createtime=#{createtime} where id=#{id}
 	</update>
 	
-	<select id="findAllUserByPage" parameterType="map" resultType="userinfo">
+	<select id="findAllUserByPage" parameterType="map" resultType="com.aaa.entity.UserInfo">
 
 		select <include refid="mySqlStatment"></include> from tbl_userinfo
 			<where>
@@ -80,7 +82,27 @@
 			</if>
 
 	</select>
-	<select id="getTotal" resultType="Integer">
+	<select id="getTotal" resultType="java.lang.Integer">
 			select count(*) totalrow from tbl_userinfo
+	</select>
+
+	<resultMap id="RoleResultMap" type="com.aaa.entity.Role">
+		<result column="role_id" jdbcType="BIGINT" property="id" />
+		<result column="name" jdbcType="VARCHAR" property="name" />
+		<result column="seq" jdbcType="TINYINT" property="seq" />
+		<result column="description" jdbcType="VARCHAR" property="description" />
+		<result column="status" jdbcType="TINYINT" property="status" />
+		<collection property="resources" ofType="com.aaa.entity.Resource" resultMap="com.aaa.dao.ResourceMapper.BaseResultMap"></collection>
+	</resultMap>
+
+	<select id="findByName" resultType="com.aaa.entity.UserInfo">
+		select * from tbl_userinfo where username=#{loginName}
+	</select>
+	<select id="findRoleByUserId" parameterType="integer" resultMap="RoleResultMap">
+		select * from user_role ur left join role r on ur.role_id=r.id where ur.user_id=#{id}
+	</select>
+	<select id="findResourceByRoleIds" parameterType="long" resultMap="com.aaa.dao.ResourceMapper.BaseResultMap">
+		select r.* from role_resource rr left join resource r on rr.resource_id=r.id where rr.role_id =#{roleId}
+
 	</select>
 </mapper>

@@ -1,6 +1,5 @@
 package com.aaa.shiro;
 
-import com.aaa.entity.User;
 import org.apache.shiro.crypto.hash.SimpleHash;
 import org.springframework.util.DigestUtils;
 
@@ -20,28 +19,6 @@ public class ShiroUtil {
         return encodeStr;
     }
 
-    /**
-     * 对用户的密码进行加盐加密,使用md5方式
-     * @param user
-     * @return
-     */
-    public static User encryptPassword(User user){
-        //加密的次数
-        int hashIterations = 10000;
-        //盐值
-        String salt = UUID.randomUUID().toString();
-        //密码
-        Object credentials = user.getPassword();
-        //加密方式
-        String hashAlgorithmName = "MD5";
-        String enPassword = new SimpleHash(hashAlgorithmName, credentials,
-                salt, hashIterations).toString();
-        System.out.println("加密的盐值----->" + salt);
-        System.out.println("加密后的值----->" + enPassword);
-        user.setPassword(enPassword);
-        user.setSalt(salt);
-        return user;
-    }
 
     public static void main(String[] args) throws Exception {
         int hashIterations = 1000;//加密的次数

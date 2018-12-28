@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * @author TeacherChen
@@ -18,7 +19,11 @@ public class UserInfo {
 	private int id;
 	private String username;
 	private String password;
+	private String salt;
 	private Timestamp createtime;
-	private String imageUrls="";/*保存照片url，以逗号分割*/
+	/*保存照片url，以逗号分割*/
+	private String imageUrls="";
+	private List<Role> roles;
+	private List<Integer> roleIds;
 
 }

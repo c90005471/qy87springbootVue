@@ -1,7 +1,6 @@
 package com.aaa.dao;
 
-import com.aaa.entity.MyCondition;
-import com.aaa.entity.UserInfo;
+import com.aaa.entity.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -18,4 +17,10 @@ public interface UserInfoDao {
 	int delUserById(Integer id);
 	List<UserInfo> findAllUserByPage(Map<String, Object> query);
 	int getTotal();
+	UserInfo findByName(String username);
+	List<Role> findRoleByUserId(Integer userid);
+	List<Resource> findResourceByRoleIds(Long roleId);
+	void  addUserRole(Map map);
+	int delUserRoleById(Integer id);
+
 }

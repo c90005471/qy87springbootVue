@@ -94,12 +94,13 @@
             center >
         <el-tree
                 :data="grantRoleList"
-                show-checkbox
+                :show-checkbox
                 node-key="id"
                 ref="tree"
-                :default-expanded-keys="[]"
+                :default-expanded-keys="opened"
                 :default-checked-keys="resourceCheckedIds"
-                :props="defaultProps">
+                :props="defaultProps"
+         >
         </el-tree>
         <span slot="footer" class="dialog-footer">
             <el-button @click="grantDialogVisible = false">取 消</el-button>
@@ -144,6 +145,7 @@
         data: {
             loading: true,
             roleList: [],
+            opened:[],
             selectStatusList:[{label:"正常",value:0},{label:"禁用",value:1}],
             //编辑界面是否显示
             centerDialogVisible: false,
@@ -166,7 +168,8 @@
             //tree的默认属性
             defaultProps:{
                 children: 'children',
-                label: 'text'
+                label: 'text',
+                id:'id',
             },
             //tree集合
             grantRoleList:[],
@@ -222,13 +225,17 @@
                     //返回所有的权限
                     vm.grantRoleList = response.data.resourceListTree;
                     vm.resourceCheckedIds = response.data.resourceCheckedIds;
+                    console.info(vm.resourceCheckedIds);
                 });
 
             },
             grantSubmit:function(){
                 var url="addGrandResource";
-                console.log(this.$refs.tree.getCheckedKeys());
-                vm.grantMap.checkedResourceList=this.$refs.tree.getCheckedKeys();
+                console.log(this.$refs.tree.getHalfCheckedKeys());
+                var  leaf=this.$refs.tree.getCheckedKeys();
+                var  half=this.$refs.tree.getHalfCheckedKeys();
+                vm.grantMap.checkedResourceList=leaf.concat(half);
+
                 axios.post(url,vm.grantMap).then(function (response) {
                    if(response.data.retStatus==0){
                        vm.grantDialogVisible = false;

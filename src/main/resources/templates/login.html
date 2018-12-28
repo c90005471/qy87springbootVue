@@ -76,7 +76,7 @@
                 var _this = this;
                 this.$refs.ruleForm2.validate((valid) => {
                     if (valid) {
-                        var loginParams = {loginName: this.ruleForm2.account, password: this.ruleForm2.checkPass};
+                        var loginParams = {username: this.ruleForm2.account, password: this.ruleForm2.checkPass};
                         var url="/login";
                         vm.logining = true;
                         axios.post(url, loginParams).then(function (response) {

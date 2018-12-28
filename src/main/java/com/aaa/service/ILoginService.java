@@ -1,7 +1,6 @@
 package com.aaa.service;
 
-import com.aaa.entity.Role;
-import com.aaa.entity.User;
+import com.aaa.entity.UserInfo;
 
 /**
  * @Author: 陈建
@@ -10,8 +9,5 @@ import com.aaa.entity.User;
  */
 public interface ILoginService {
 
-    User findByName(String name);
-    User addUser(User user);
-    //添加角色
-     Role addRole(Role role) ;
+    UserInfo findByName(String name);
 }
