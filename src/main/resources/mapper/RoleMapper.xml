@@ -82,7 +82,8 @@
       select * from role order by seq asc
   </select>
   <!--根据roleid查询对应的所有resource的id-->
+  <!--and resource_id not in (select DISTINCT pid from resource where pid>0 ) 过滤出没有孩子的资源，因为elementui会默认全选所有的孩子节点-->
   <select id="findResourceByRoleId" parameterType="java.lang.Long" resultType="java.lang.Long">
-      select resource_id as id from role_resource where role_id=#{id}
+      select resource_id as id from role_resource where role_id=#{id}  and resource_id not in (select DISTINCT pid from resource where pid>0 )
   </select>
 </mapper>

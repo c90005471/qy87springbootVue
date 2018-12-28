@@ -76,7 +76,7 @@
             </el-form-item>
             <el-form-item label="角色状态" prop="status">
                 <el-select v-model="form.status" placeholder="角色状态">
-                    <el-option v-for="item in selectStatusList" :label="item.label" :value="item.value">
+                    <el-option v-for="item in selectStatusList" :key="item.label" :label="item.label" :value="item.value">
                     </el-option>
                 </el-select>
             </el-form-item>
@@ -97,8 +97,7 @@
                 show-checkbox
                 node-key="id"
                 ref="tree"
-                :default-expanded-keys="opened"
-                :default-checked-keys="resourceCheckedIds"
+                highlight-current
                 :props="defaultProps"
          >
         </el-tree>
@@ -215,27 +214,37 @@
                 vm.centerDialogVisible = true;
 
             },
-            //表格编辑事件
+            //授权事件
             grantClick: function (row) {
                 vm.grantDialogVisible = true;
                 vm.grantMap.id=row.id;
-                console.info(row.id);
                 var url="findResourceByRoleId?id="+row.id;
+                //this.$refs.tree.setCheckedNodes([]);
+
+                var _self=this;
                 axios.post(url).then(function (response) {
                     //返回所有的权限
                     vm.grantRoleList = response.data.resourceListTree;
                     vm.resourceCheckedIds = response.data.resourceCheckedIds;
-                    console.info(vm.resourceCheckedIds);
+                    //[ 1, 14, 141 ]
+                    _self.$refs.tree.setCheckedKeys(vm.resourceCheckedIds,true);
+                    console.info(response.data.resourceCheckedIds);
+                    console.info("aaaaaaa");
                 });
+
 
             },
             grantSubmit:function(){
                 var url="addGrandResource";
-                console.log(this.$refs.tree.getHalfCheckedKeys());
+                /*console.log(this.$refs.tree.getHalfCheckedKeys());*/
                 var  leaf=this.$refs.tree.getCheckedKeys();
                 var  half=this.$refs.tree.getHalfCheckedKeys();
                 vm.grantMap.checkedResourceList=leaf.concat(half);
-
+              /* var nodes= this.$refs.tree.getCheckedNodes(false,true);
+               for(var i=0;i<nodes.length;i++){
+                   vm.grantMap.checkedResourceList.push(nodes[i].id);
+               }*/
+                console.log(vm.grantMap.checkedResourceList);
                 axios.post(url,vm.grantMap).then(function (response) {
                    if(response.data.retStatus==0){
                        vm.grantDialogVisible = false;
