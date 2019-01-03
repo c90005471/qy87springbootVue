@@ -2,7 +2,7 @@ package com.aaa.controller;
 
 import com.aaa.entity.ResultModel;
 import com.aaa.entity.UserInfo;
-import com.aaa.service.ILoginService;
+import com.aaa.service.UserInfoBiz;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.DisabledAccountException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
@@ -24,9 +24,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 public class LoginController extends  BaseContrllor {
-    @Autowired
-    private ILoginService loginService;
-
     //退出的时候是get请求，主要是用于退出
     @RequestMapping(value = "/login",method = RequestMethod.GET)
     public String login(){
