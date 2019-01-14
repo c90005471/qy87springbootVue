@@ -47,10 +47,10 @@
         >
         </el-table-column>
         <el-table-column
-                prop="password"
-                label="密码"
+                prop="roles[0].name"
+                label="角色"
                 width="180"
-                sortable>
+              >
         </el-table-column>
         <el-table-column
                 prop="createtime"
@@ -69,10 +69,14 @@
         <el-table-column
                 label="操作" width="180">
             <template slot-scope="scope">
-                <el-button :plain="true" type="success" size="small" icon="edit" @click="editClick(scope.row)">编辑
-                </el-button>
-                <el-button :plain="true" type="danger" size="small" icon="delete" @click="deleteUser(scope.row)">删除
-                </el-button>
+                <shiro:hasPermission name="/user/edit">
+                    <el-button :plain="true" type="success" size="small" icon="edit" @click="editClick(scope.row)">编辑
+                    </el-button>
+                </shiro:hasPermission>
+                <shiro:hasPermission name="/user/delete">
+                    <el-button :plain="true" type="danger" size="small" icon="delete" @click="deleteUser(scope.row)">删除
+                    </el-button>
+                </shiro:hasPermission>
             </template>
         </el-table-column>
     </el-table>
@@ -249,6 +253,10 @@
                     axios.post(url, query).then(function (response) {
                         vm.userList = response.data.items;
                         vm.total = response.data.totalNum;
+                        if(response.data.retStatus==1){
+
+                            vm.open5(response.data.message);
+                        }
                     });
                     vm.loading = false;
                 },300);

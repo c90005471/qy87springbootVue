@@ -87,7 +87,6 @@ public class UserInfoController  extends BaseContrllor{
 	@RequestMapping("/findAllUserJson")
 	@ResponseBody
 	public PageBean<UserInfo> findAllUserJson(@RequestBody Map<String,Object> query) {
-		//userInfoImpl.findAllUser(query);
 		return userInfoImpl.findAllUser(query);
 	}
 	/**

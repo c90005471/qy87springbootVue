@@ -41,7 +41,7 @@
 		select <include refid="mySqlStatment"></include> from tbl_userinfo
 	</select>
 	<!-- 创建resultmap,type指的是java实体类型 -->
-	<resultMap type="userinfo" id="myresultMap">
+	<resultMap type="com.aaa.entity.UserInfo" id="myresultMap">
 		<!-- id标签代表实体类中对应数据库主键的属性 -->
 		<!-- <id property="id" column="id"/> -->
 		<result property="id" column="id"/>

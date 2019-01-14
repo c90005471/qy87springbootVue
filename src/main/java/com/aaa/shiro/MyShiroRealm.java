@@ -3,7 +3,7 @@ package com.aaa.shiro;
 import com.aaa.entity.Resource;
 import com.aaa.entity.Role;
 import com.aaa.entity.UserInfo;
-import com.aaa.service.ILoginService;
+import com.aaa.service.UserInfoBiz;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class MyShiroRealm extends AuthorizingRealm {
     //用于用户查询
     @Autowired
-    private ILoginService loginService;
+    private UserInfoBiz userInfoImpl;
 
     //角色权限和对应权限添加
     @Override
@@ -32,7 +32,7 @@ public class MyShiroRealm extends AuthorizingRealm {
         //获取登录用户名
         String name= (String) principalCollection.getPrimaryPrincipal();
         //查询用户名称
-        UserInfo user = loginService.findByName(name);
+        UserInfo user = userInfoImpl.findByName(name);
         //添加角色和权限
         SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
         for (Role role:user.getRoles()) {
@@ -58,7 +58,7 @@ public class MyShiroRealm extends AuthorizingRealm {
         }
         //获取用户信息
         String name = authenticationToken.getPrincipal().toString();
-        UserInfo user = loginService.findByName(name);
+        UserInfo user = userInfoImpl.findByName(name);
         if (user == null) {
             //这里返回后会报出对应异常
             throw new RuntimeException("账号不存在！");

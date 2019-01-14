@@ -15,4 +15,5 @@ public interface UserInfoBiz {
 	int delUserById(Integer id);
 	void eaddUser2(UserInfo user);
 	int editUser(UserInfo user);
+	UserInfo findByName(String name);
 }
