@@ -133,7 +133,7 @@
                 <configuration>
                     <port>8080</port>
                     <path>/ROOT</path>
-                    <url>http://192.168.153.100:8080/manager/text</url>
+                    <url>http://192.168.153.100:8080/manager</url>
                     <username>chenjian</username>
                     <password>tiger</password>
                 </configuration>
